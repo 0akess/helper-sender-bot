@@ -1,0 +1,40 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam SequenceMessageAlign center
+skinparam ParticipantPadding 20
+skinparam SequenceNumbering asDecimal
+
+== Сценарий Выгрузки постов - обращений ==
+
+participant DutyBot
+database DB
+participant "Mattermost API" as MAPI
+
+DutyBot -> MAPI: выгружает посты
+MAPI --> DutyBot: []posts
+DutyBot -> DB: add posts
+
+newpage
+== Сценарий Напоминание обработки обращений ==
+
+participant DutyBot
+database DB
+participant "Mattermost API" as MAPI
+
+DutyBot -> DB: select posts
+DB --> DutyBot: []posts
+loop Обработка каждого post
+    DutyBot -> MAPI: CreatePost("@duty ...")
+    MAPI --> DutyBot: OK
+end loop
+
+newpage
+== Сценарий Очистки старых постов ==
+
+participant DutyBot
+database DB
+participant "Mattermost API" as MAPI
+
+DutyBot -> DB: удаление старых записей
+
+@enduml

@@ -1,0 +1,106 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam SequenceMessageAlign center
+skinparam ParticipantPadding 20
+skinparam SequenceNumbering asDecimal
+
+== Сценарий GitLab Webhook – New MR ==
+
+participant GitLab
+participant GitBotSender
+participant "Mattermost API" as MAPI
+
+GitLab -> GitBotSender: POST /gitlab/webhook/mr_info
+GitBotSender -> cache: getCfgGitlab Info
+cache --> GitBotSender: CfgGitlab Info
+cache -> DB: getCfgGitlab Info
+DB --> cache: CfgGitlab Info
+
+alt config_gitlab.requires_qa_review == true
+    GitBotSender -> MAPI: CreatePost("New MR ... Нужен @qa (config_gitlab.qa_reviewers)")
+else
+    GitBotSender -> MAPI: CreatePost("New MR ...")
+end
+MAPI --> GitBotSender: post_id
+GitBotSender --> DB: post_id
+
+newpage
+== Сценарий GitLab Webhook – Close MR ==
+
+participant GitLab
+participant GitBotSender
+participant "Mattermost API" as MAPI
+
+GitLab -> GitBotSender: POST /gitlab/webhook/mr_info
+GitBotSender -> cache: getCfgGitlab Info
+cache -> DB: getCfgGitlab Info
+DB --> cache: CfgGitlab Info
+cache --> GitBotSender: CfgGitlab Info
+GitBotSender -> DB: get_post
+DB --> GitBotSender: post
+GitBotSender -> MAPI: CreatePost("MR Closed ...")
+GitBotSender -> DB: delete_post
+
+newpage
+== Сценарий GitLab Webhook – Merge MR ==
+
+participant GitLab
+participant GitBotSender
+participant DB
+participant cache
+participant "Mattermost API" as MAPI
+
+GitLab -> GitBotSender: POST /gitlab/webhook/mr_info
+GitBotSender --> DB: get_post
+DB --> GitBotSender: post
+GitBotSender -> cache: get_project_config
+cache -> DB: get_project_config
+DB --> cache: project_config
+cache --> GitBotSender: project_config
+alt config_gitlab.push_qa_after_review == true
+    GitBotSender -> MAPI: CreatePost("MR Merged ... @qa (config_gitlab.qa_reviewers)")
+else
+    GitBotSender -> MAPI: CreatePost("MR Merged ...")
+end
+GitBotSender -> DB: delete_post
+
+newpage
+== Сценарий повторного пуша ==
+
+participant GitBotSender
+database   DB
+participant "Mattermost API" as MAPI
+
+
+GitBotSender -> DB: get_post without push
+DB --> GitBotSender: posts
+GitBotSender -> cache: get_project_config
+cache -> DB: get_project_config
+DB --> cache: project_config
+cache --> GitBotSender: project_config
+
+GitBotSender -> MAPI: CreatePost("MR still pending…")
+MAPI --> GitBotSender: post_id
+
+
+newpage
+== Сценарий повторного пуша в рабочий день пн-пт ==
+
+participant GitBotSender
+participant DB
+participant cache
+participant "Mattermost API" as MAPI
+
+GitBotSender --> DB: get_post
+DB --> GitBotSender: post
+GitBotSender -> cache: get_project_config
+cache -> DB: get_project_config
+DB --> cache: project_config
+cache --> GitBotSender: project_config
+alt если МР создан (сегодня минус 1 день) и уже 15:00 по МСК
+    GitBotSender -> MAPI: CreatePost("MR Merged ... @reviewers")
+else
+   GitBotSender -> GitBotSender: ничего не делает
+end
+
+@enduml

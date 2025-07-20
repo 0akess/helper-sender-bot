@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: bot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    platform: linux/amd64
+    container_name: gitlab
+    restart: always
+    hostname: gitlab.local
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://localhost'
+        gitlab_rails['gitlab_shell_ssh_port'] = 22
+      GITLAB_ROOT_PASSWORD: "MySecureP@ssw0rd"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2222:22"
+    volumes:
+      - gitlab-config:/etc/gitlab
+      - gitlab-logs:/var/log/gitlab
+      - gitlab-data:/var/opt/gitlab
+
+  mattermost:
+    image: mattermost/mattermost-preview:latest
+    container_name: mattermost
+    restart: always
+    ports:
+      - "8065:8065"
+      - "8443:8443"
+    volumes:
+      - mattermost_data:/mattermost/data
+
+volumes:
+  postgres_data:
+  gitlab-config:
+  gitlab-logs:
+  gitlab-data:
+  mattermost_data:

@@ -1,0 +1,399 @@
+components:
+  schemas:
+    ChatConfig:
+      properties:
+        channel_id:
+          type: string
+        duty_repeat_ttl_in_minute:
+          minimum: 1
+          type: integer
+        duty_ttl_in_minute:
+          minimum: 1
+          type: integer
+        emoji_done:
+          type: string
+        emoji_start:
+          type: string
+        workday_end:
+          maximum: 23
+          minimum: 0
+          type: integer
+        workday_start:
+          maximum: 23
+          minimum: 0
+          type: integer
+      required:
+      - channel_id
+      - duty_ttl_in_minute
+      - duty_repeat_ttl_in_minute
+      - emoji_start
+      - emoji_done
+      - workday_start
+      - workday_end
+      type: object
+    GitlabConfig:
+      properties:
+        channel_id:
+          type: string
+        gitlab_url:
+          format: uri
+          type: string
+        project_id:
+          type: integer
+        project_name:
+          type: string
+        push_qa_after_review:
+          type: boolean
+        qa_reviewers:
+          type: string
+        requires_qa_review:
+          type: boolean
+        reviewers:
+          items:
+            type: string
+          type: array
+        reviewers_count:
+          type: integer
+        ttl_review:
+          items:
+            $ref: '#/components/schemas/TTLReviewItem'
+          type: array
+      required:
+      - gitlab_url
+      - project_name
+      - project_id
+      - channel_id
+      - reviewers
+      - reviewers_count
+      - ttl_review
+      type: object
+    TTLReviewItem:
+      properties:
+        mr_size:
+          type: integer
+        mr_size_name:
+          type: string
+        sla:
+          type: integer
+      required:
+      - sla
+      - mr_size
+      - mr_size_name
+      type: object
+    Team:
+      properties:
+        team_lead_eid:
+          type: string
+        team_name:
+          type: string
+        token:
+          format: uuid
+          type: string
+      required:
+      - team_name
+      - token
+      - team_lead_eid
+      type: object
+    TeamUpdate:
+      properties:
+        new_team_lead_eid:
+          type: string
+        new_token:
+          format: uuid
+          type: string
+      required:
+      - new_token
+      - new_team_lead_eid
+      type: object
+  securitySchemes:
+    X-Auth-Token:
+      description: Team authorization token (UUID)
+      in: header
+      name: X-Auth-Token
+      type: apiKey
+    X-Team:
+      description: Team identifier header
+      in: header
+      name: X-Team
+      type: apiKey
+info:
+  description: API for configuring chat and GitLab integrations, teams, and handling
+    GitLab webhooks.
+  title: Helper Sender Bot API
+  version: 1.0.0
+openapi: 3.0.3
+paths:
+  /gitlab/webhook/mr_info:
+    post:
+      description: Endpoint for GitLab to push MR events. No authentication.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                action:
+                  description: opened, merged, closed
+                  type: string
+                mr_iid:
+                  type: integer
+                mr_title:
+                  type: string
+                project_id:
+                  type: integer
+                project_name:
+                  type: string
+                source_branch:
+                  type: string
+                state:
+                  type: string
+                target_branch:
+                  type: string
+              required:
+              - project_id
+              - project_name
+              - mr_iid
+              - mr_title
+              - source_branch
+              - target_branch
+              - state
+              - action
+              type: object
+        required: true
+      responses:
+        '200':
+          description: Accepted
+      summary: GitLab merge request webhook
+  /v1/config_duty:
+    delete:
+      parameters:
+      - in: query
+        name: channel
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Deleted
+      security:
+      - X-Auth-Token: []
+        X-Team: []
+      summary: Delete chat configuration
+      tags:
+      - Chat
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ChatConfig'
+                type: array
+          description: List of chat configs
+      security:
+      - X-Auth-Token: []
+        X-Team: []
+      summary: Get chat configurations
+      tags:
+      - Chat
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatConfig'
+        required: true
+      responses:
+        '201':
+          description: Created
+      security:
+      - X-Auth-Token: []
+        X-Team: []
+      summary: Create chat configuration
+      tags:
+      - Chat
+    put:
+      parameters:
+      - description: Channel ID of the chat to update
+        in: query
+        name: channel
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatConfig'
+        required: true
+      responses:
+        '200':
+          description: Updated
+      security:
+      - X-Auth-Token: []
+        X-Team: []
+      summary: Update chat configuration
+      tags:
+      - Chat
+  /v1/config_gitlab:
+    delete:
+      parameters:
+      - in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+      - in: query
+        name: git_url
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Deleted
+      security:
+      - X-Auth-Token: []
+        X-Team: []
+      summary: Delete GitLab configuration
+      tags:
+      - GitConfig
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/GitlabConfig'
+                type: array
+          description: List of GitLab configs
+      security:
+      - X-Auth-Token: []
+        X-Team: []
+      summary: Get GitLab configurations
+      tags:
+      - GitConfig
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitlabConfig'
+        required: true
+      responses:
+        '201':
+          description: Created
+      security:
+      - X-Auth-Token: []
+        X-Team: []
+      summary: Create GitLab configuration
+      tags:
+      - GitConfig
+    put:
+      parameters:
+      - in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+      - in: query
+        name: git_url
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitlabConfig'
+        required: true
+      responses:
+        '200':
+          description: Updated
+      security:
+      - X-Auth-Token: []
+        X-Team: []
+      summary: Update GitLab configuration
+      tags:
+      - GitConfig
+  /v1/team:
+    delete:
+      responses:
+        '204':
+          description: Deleted
+      security:
+      - X-Auth-Token: []
+        X-Team: []
+      summary: Delete a team
+      tags:
+      - Team
+    get:
+      parameters:
+      - in: query
+        name: cursor
+        schema:
+          type: integer
+      - in: query
+        name: limit
+        schema:
+          type: integer
+      - in: query
+        name: team_name_like
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  next_cursor:
+                    type: integer
+                  teams:
+                    items:
+                      type: string
+                    type: array
+                type: object
+          description: Teams list
+      summary: List teams
+      tags:
+      - Team
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Team'
+        required: true
+      responses:
+        '201':
+          description: Created
+      summary: Create a team
+      tags:
+      - Team
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamUpdate'
+        required: true
+      responses:
+        '200':
+          description: Updated
+      security:
+      - X-Auth-Token: []
+        X-Team: []
+      summary: Update a team
+      tags:
+      - Team
+servers:
+- description: Local development
+  url: http://localhost:8080
+tags:
+- description: Operations relating to teams
+  name: Team
+- description: Operations for managing GitLab integration configs
+  name: GitConfig
+- description: Operations for chat channels
+  name: Chat
