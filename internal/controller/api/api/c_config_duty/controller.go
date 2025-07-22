@@ -7,30 +7,29 @@ import (
 	"helper-sender-bot/internal/entity"
 )
 
-type usecases interface {
+type dutyCfg interface {
 	GetListDutyCfgByTeam(ctx context.Context, team string) ([]entity.Chat, error)
 	CreateDutyCfg(ctx context.Context, chat entity.Chat, team string) error
 	UpdateDutyCfg(ctx context.Context, channel, team string, upd entity.Chat) error
 	DeleteDutyCfg(ctx context.Context, channel, team string) error
 }
 
-type ucAuth interface {
-	Auth(ctx context.Context, auth entity.AuthMeta) error
+type auth interface {
+	CheckAuth(ctx context.Context, auth entity.AuthMeta) error
 }
 
 type CfgDutyController struct {
-	ctx    context.Context
-	uc     usecases
-	ucAuth ucAuth
+	ctx     context.Context
+	dutyCfg dutyCfg
+	auth    auth
 }
 
-func NewControllerCfgDuty(ctx context.Context, usecases usecases, ucAuth ucAuth) *CfgDutyController {
-	c := &CfgDutyController{
-		ctx:    ctx,
-		uc:     usecases,
-		ucAuth: ucAuth,
+func NewControllerCfgDuty(ctx context.Context, dutyCfg dutyCfg, auth auth) *CfgDutyController {
+	return &CfgDutyController{
+		ctx:     ctx,
+		dutyCfg: dutyCfg,
+		auth:    auth,
 	}
-	return c
 }
 
 func (c *CfgDutyController) RegisterRoutes(e *echo.Echo) {

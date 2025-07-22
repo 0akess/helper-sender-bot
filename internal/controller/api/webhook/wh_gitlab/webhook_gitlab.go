@@ -53,15 +53,15 @@ func (gc *GitlabController) handleGitlabWebhook(e echo.Context) error {
 	switch body.MRState {
 	case "opened":
 		go func() {
-			gc.uc.SendPushNewMR(gc.ctx, body)
+			gc.pushMR.SendPushNewMR(gc.ctx, body)
 		}()
 	case "merged":
 		go func() {
-			gc.uc.SendPushMergedMR(gc.ctx, body)
+			gc.pushMR.SendPushMergedMR(gc.ctx, body)
 		}()
 	case "closed":
 		go func() {
-			gc.uc.SendPushClosedMR(gc.ctx, body)
+			gc.pushMR.SendPushClosedMR(gc.ctx, body)
 		}()
 	}
 

@@ -2,7 +2,7 @@ package c_chat_config
 
 import (
 	"github.com/labstack/echo/v4"
-	r "helper-sender-bot/internal/controller/api/api/responses"
+	"helper-sender-bot/internal/controller/api/api/responses"
 	"net/http"
 )
 
@@ -12,13 +12,13 @@ type getAllTeamQuery struct {
 	SearchTeamName string `query:"team_name_like"`
 }
 
-func (c *Controller) getTeam(e echo.Context) error {
+func (t *Controller) getTeam(e echo.Context) error {
 	var query getAllTeamQuery
 	if err := e.Bind(&query); err != nil {
-		return r.InvalidInputMassage(err)
+		return responses.InvalidInputMassage(err)
 	}
 	if err := e.Validate(query); err != nil {
-		return r.InvalidInputMassage(err)
+		return responses.InvalidInputMassage(err)
 	}
 
 	if query.Cursor <= 0 {
@@ -28,9 +28,9 @@ func (c *Controller) getTeam(e echo.Context) error {
 		query.Limit = 10
 	}
 
-	teams, nextCursor, err := c.uc.GetTeams(c.ctx, query.Limit, query.Cursor-1, query.SearchTeamName)
+	teams, nextCursor, err := t.team.GetTeams(t.ctx, query.Limit, query.Cursor-1, query.SearchTeamName)
 	if err != nil {
-		return r.InternalErrorMassage(err)
+		return responses.InternalErrorMassage(err)
 	}
 
 	if len(teams) == 0 {

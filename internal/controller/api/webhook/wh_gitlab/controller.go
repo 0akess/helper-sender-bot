@@ -6,23 +6,23 @@ import (
 	"helper-sender-bot/internal/entity"
 )
 
-type usecases interface {
+type pushMR interface {
 	SendPushNewMR(ctx context.Context, mr entity.MergeRequestPayload)
 	SendPushMergedMR(ctx context.Context, mr entity.MergeRequestPayload)
 	SendPushClosedMR(ctx context.Context, mr entity.MergeRequestPayload)
 }
 
 type GitlabController struct {
-	ctx   context.Context
-	uc    usecases
-	token string
+	ctx    context.Context
+	pushMR pushMR
+	token  string
 }
 
-func NewControllerGitlab(ctx context.Context, uc usecases, token string) *GitlabController {
+func NewControllerGitlab(ctx context.Context, pushMR pushMR, token string) *GitlabController {
 	c := &GitlabController{
-		ctx:   ctx,
-		uc:    uc,
-		token: token,
+		ctx:    ctx,
+		pushMR: pushMR,
+		token:  token,
 	}
 	return c
 }

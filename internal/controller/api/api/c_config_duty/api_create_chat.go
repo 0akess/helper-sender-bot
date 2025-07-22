@@ -3,7 +3,7 @@ package c_config_duty
 import (
 	"github.com/labstack/echo/v4"
 	"helper-sender-bot/internal/controller/api/api/middleware"
-	r "helper-sender-bot/internal/controller/api/api/responses"
+	"helper-sender-bot/internal/controller/api/api/responses"
 	"helper-sender-bot/internal/entity"
 	"net/http"
 )
@@ -21,21 +21,21 @@ type createChatReq struct {
 func (c *CfgDutyController) createChat(e echo.Context) error {
 	auth, err := middleware.GetAuth(e)
 	if err != nil {
-		return r.NotAuthMassage(err)
+		return responses.NotAuthMassage(err)
 	}
 
-	err = c.ucAuth.Auth(c.ctx, auth)
+	err = c.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
-		return r.ForbiddenMassage(err)
+		return responses.ForbiddenMassage(err)
 	}
 
 	var req createChatReq
 	if err := e.Bind(&req); err != nil {
-		return r.InvalidInputMassage(err)
+		return responses.InvalidInputMassage(err)
 	}
 
 	if err := e.Validate(req); err != nil {
-		return r.InvalidInputMassage(err)
+		return responses.InvalidInputMassage(err)
 	}
 
 	chat := entity.Chat{
@@ -48,9 +48,9 @@ func (c *CfgDutyController) createChat(e echo.Context) error {
 		WorkdayEnd:            req.WorkdayEnd,
 	}
 
-	err = c.uc.CreateDutyCfg(c.ctx, chat, auth.Team)
+	err = c.dutyCfg.CreateDutyCfg(e.Request().Context(), chat, auth.Team)
 	if err != nil {
-		return r.InternalErrorMassage(err)
+		return responses.InternalErrorMassage(err)
 	}
 	return e.JSON(http.StatusCreated, map[string]bool{"success": true})
 }

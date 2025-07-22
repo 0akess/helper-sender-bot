@@ -3,7 +3,7 @@ package c_config_gitlab
 import (
 	"github.com/labstack/echo/v4"
 	"helper-sender-bot/internal/controller/api/api/middleware"
-	r "helper-sender-bot/internal/controller/api/api/responses"
+	"helper-sender-bot/internal/controller/api/api/responses"
 	"net/http"
 )
 
@@ -23,17 +23,17 @@ type getGitlabConfigRes struct {
 func (c *Controller) getGitCfg(e echo.Context) error {
 	auth, err := middleware.GetAuth(e)
 	if err != nil {
-		return r.NotAuthMassage(err)
+		return responses.NotAuthMassage(err)
 	}
 
-	err = c.ucAuth.Auth(c.ctx, auth)
+	err = c.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
-		return r.ForbiddenMassage(err)
+		return responses.ForbiddenMassage(err)
 	}
 
-	gitCfg, err := c.uc.GetGitlabConfigs(c.ctx, auth.Team)
+	gitCfg, err := c.gitlabCfg.GetGitlabConfigs(e.Request().Context(), auth.Team)
 	if err != nil {
-		return r.InternalErrorMassage(err)
+		return responses.InternalErrorMassage(err)
 	}
 
 	if len(gitCfg) == 0 {

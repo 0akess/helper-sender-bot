@@ -3,7 +3,7 @@ package c_chat_config
 import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	r "helper-sender-bot/internal/controller/api/api/responses"
+	"helper-sender-bot/internal/controller/api/api/responses"
 	"helper-sender-bot/internal/entity"
 	"net/http"
 )
@@ -14,13 +14,13 @@ type teamReq struct {
 	LeadEID string    `json:"team_lead_eid" validate:"required,min=1"`
 }
 
-func (c *Controller) createTeam(e echo.Context) error {
+func (t *Controller) createTeam(e echo.Context) error {
 	var req teamReq
 	if err := e.Bind(&req); err != nil {
-		return r.InvalidInputMassage(err)
+		return responses.InvalidInputMassage(err)
 	}
 	if err := e.Validate(req); err != nil {
-		return r.InvalidInputMassage(err)
+		return responses.InvalidInputMassage(err)
 	}
 
 	team := entity.Team{
@@ -29,9 +29,9 @@ func (c *Controller) createTeam(e echo.Context) error {
 		Token:   req.Token,
 	}
 
-	err := c.uc.CreateTeam(c.ctx, team)
+	err := t.team.CreateTeam(t.ctx, team)
 	if err != nil {
-		return r.InternalErrorMassage(err)
+		return responses.InternalErrorMassage(err)
 	}
 	return e.JSON(http.StatusCreated, map[string]bool{"success": true})
 }

@@ -8,30 +8,29 @@ import (
 	"helper-sender-bot/internal/entity"
 )
 
-type usecases interface {
+type team interface {
 	CreateTeam(ctx context.Context, team entity.Team) error
 	GetTeams(ctx context.Context, limit, cursor int, search string) ([]string, int, error)
 	UpdateTeam(ctx context.Context, newTeam entity.Team, teamName string, token uuid.UUID) error
 	DeleteTeam(ctx context.Context, teamName string, token uuid.UUID) error
 }
 
-type ucAuth interface {
-	Auth(ctx context.Context, auth entity.AuthMeta) error
+type auth interface {
+	CheckAuth(ctx context.Context, auth entity.AuthMeta) error
 }
 
 type Controller struct {
-	ctx    context.Context
-	uc     usecases
-	ucAuth ucAuth
+	ctx  context.Context
+	team team
+	auth auth
 }
 
-func NewControllerTeam(ctx context.Context, usecases usecases, ucAuth ucAuth) *Controller {
-	c := &Controller{
-		ctx:    ctx,
-		uc:     usecases,
-		ucAuth: ucAuth,
+func NewControllerTeam(ctx context.Context, team team, ucAuth auth) *Controller {
+	return &Controller{
+		ctx:  ctx,
+		team: team,
+		auth: ucAuth,
 	}
-	return c
 }
 
 func (t *Controller) RegisterRoutes(e *echo.Echo) {

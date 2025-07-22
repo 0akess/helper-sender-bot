@@ -3,7 +3,7 @@ package c_config_duty
 import (
 	"github.com/labstack/echo/v4"
 	"helper-sender-bot/internal/controller/api/api/middleware"
-	r "helper-sender-bot/internal/controller/api/api/responses"
+	"helper-sender-bot/internal/controller/api/api/responses"
 	"net/http"
 )
 
@@ -20,17 +20,17 @@ type getChatsResponse struct {
 func (c *CfgDutyController) getChats(e echo.Context) error {
 	auth, err := middleware.GetAuth(e)
 	if err != nil {
-		return r.NotAuthMassage(err)
+		return responses.NotAuthMassage(err)
 	}
 
-	err = c.ucAuth.Auth(c.ctx, auth)
+	err = c.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
-		return r.ForbiddenMassage(err)
+		return responses.ForbiddenMassage(err)
 	}
 
-	chats, err := c.uc.GetListDutyCfgByTeam(c.ctx, auth.Team)
+	chats, err := c.dutyCfg.GetListDutyCfgByTeam(e.Request().Context(), auth.Team)
 	if err != nil {
-		return r.InternalErrorMassage(err)
+		return responses.InternalErrorMassage(err)
 	}
 
 	if len(chats) == 0 {

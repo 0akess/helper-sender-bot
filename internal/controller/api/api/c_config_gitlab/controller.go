@@ -7,30 +7,29 @@ import (
 	"helper-sender-bot/internal/entity"
 )
 
-type usecases interface {
+type gitlabCfg interface {
 	CreateGitlabConfig(ctx context.Context, cfg entity.GitlabConfig) error
 	DeleteGitlabConfig(ctx context.Context, gitProjectID int, gitURL, team string) error
 	UpdateGitlabConfig(ctx context.Context, cfg entity.GitlabConfig, gitProjectID int, gitURL string) error
 	GetGitlabConfigs(ctx context.Context, team string) ([]entity.GitlabConfig, error)
 }
 
-type ucAuth interface {
-	Auth(ctx context.Context, auth entity.AuthMeta) error
+type auth interface {
+	CheckAuth(ctx context.Context, auth entity.AuthMeta) error
 }
 
 type Controller struct {
-	ctx    context.Context
-	uc     usecases
-	ucAuth ucAuth
+	ctx       context.Context
+	gitlabCfg gitlabCfg
+	auth      auth
 }
 
-func NewControllerCfgGit(ctx context.Context, usecases usecases, ucAuth ucAuth) *Controller {
-	c := &Controller{
-		ctx:    ctx,
-		uc:     usecases,
-		ucAuth: ucAuth,
+func NewControllerCfgGit(ctx context.Context, gitlabCfg gitlabCfg, auth auth) *Controller {
+	return &Controller{
+		ctx:       ctx,
+		gitlabCfg: gitlabCfg,
+		auth:      auth,
 	}
-	return c
 }
 
 func (c *Controller) RegisterRoutes(e *echo.Echo) {

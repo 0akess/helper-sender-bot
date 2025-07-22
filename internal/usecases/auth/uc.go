@@ -23,7 +23,7 @@ func NewAuth(ctx context.Context, repo repo) *Auth {
 	}
 }
 
-func (a *Auth) Auth(ctx context.Context, auth entity.AuthMeta) error {
+func (a *Auth) CheckAuth(ctx context.Context, auth entity.AuthMeta) error {
 	tokenOk, err := a.repo.OkTokenTeam(ctx, auth.Team, auth.Token)
 	if err != nil {
 		return err

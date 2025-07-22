@@ -3,28 +3,28 @@ package c_config_gitlab
 import (
 	"github.com/labstack/echo/v4"
 	"helper-sender-bot/internal/controller/api/api/middleware"
-	r "helper-sender-bot/internal/controller/api/api/responses"
+	"helper-sender-bot/internal/controller/api/api/responses"
 	"net/http"
 )
 
 func (c *Controller) deleteGitCfg(e echo.Context) error {
 	auth, err := middleware.GetAuth(e)
 	if err != nil {
-		return r.NotAuthMassage(err)
+		return responses.NotAuthMassage(err)
 	}
 
-	err = c.ucAuth.Auth(c.ctx, auth)
+	err = c.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
-		return r.ForbiddenMassage(err)
+		return responses.ForbiddenMassage(err)
 	}
 
 	gitURL, projectID, err := gitUrlAndIdQuery(e)
 	if err != nil {
-		return r.InvalidInputMassage(err)
+		return responses.InvalidInputMassage(err)
 	}
 
-	if err = c.uc.DeleteGitlabConfig(c.ctx, projectID, gitURL, auth.Team); err != nil {
-		return r.InternalErrorMassage(err)
+	if err = c.gitlabCfg.DeleteGitlabConfig(e.Request().Context(), projectID, gitURL, auth.Team); err != nil {
+		return responses.InternalErrorMassage(err)
 	}
 	return e.NoContent(http.StatusNoContent)
 }

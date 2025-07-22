@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"helper-sender-bot/internal/controller/api/api/middleware"
-	r "helper-sender-bot/internal/controller/api/api/responses"
+	"helper-sender-bot/internal/controller/api/api/responses"
 	"helper-sender-bot/internal/entity"
 	"net/http"
 )
@@ -25,32 +25,32 @@ type createGitlabConfig struct {
 func (c *Controller) createGitCfg(e echo.Context) error {
 	auth, err := middleware.GetAuth(e)
 	if err != nil {
-		return r.NotAuthMassage(err)
+		return responses.NotAuthMassage(err)
 	}
 
-	err = c.ucAuth.Auth(c.ctx, auth)
+	err = c.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
-		return r.ForbiddenMassage(err)
+		return responses.ForbiddenMassage(err)
 	}
 
 	var req createGitlabConfig
 	if err := e.Bind(&req); err != nil {
-		return r.InvalidInputMassage(err)
+		return responses.InvalidInputMassage(err)
 	}
 
 	if err := e.Validate(req); err != nil {
-		return r.InvalidInputMassage(err)
+		return responses.InvalidInputMassage(err)
 	}
 
 	if (req.RequiresQaReview || req.PushQaAfterReview) && req.QAReviewers == "" {
-		return r.InvalidInputMassage(
+		return responses.InvalidInputMassage(
 			fmt.Errorf("qa_reviewers is required for requires_qa_review or push_qa_after_review"),
 		)
 	}
 
 	ttlReview, err, ok := checkAndBuildTTLReview(req.TTLReview)
 	if !ok {
-		return r.InvalidInputMassage(err)
+		return responses.InvalidInputMassage(err)
 	}
 
 	git := entity.GitlabConfig{
@@ -67,9 +67,9 @@ func (c *Controller) createGitCfg(e echo.Context) error {
 		PushQaAfterReview: req.PushQaAfterReview,
 	}
 
-	err = c.uc.CreateGitlabConfig(c.ctx, git)
+	err = c.gitlabCfg.CreateGitlabConfig(e.Request().Context(), git)
 	if err != nil {
-		return r.InternalErrorMassage(err)
+		return responses.InternalErrorMassage(err)
 	}
 	return e.JSON(http.StatusCreated, map[string]bool{"success": true})
 }

@@ -24,7 +24,7 @@ func (e ResponseError) Error() string {
 	return fmt.Sprintf("%s: %s", e.ErrDetail.Code, e.ErrDetail.Message)
 }
 
-func New(status int, code, message string, details interface{}) ResponseError {
+func NewError(status int, code, message string, details interface{}) ResponseError {
 	return ResponseError{
 		Status: status,
 		ErrDetail: detailError{
@@ -59,7 +59,7 @@ func BuildDetails(err error) map[string]string {
 }
 
 func InvalidInputMassage(err error) ResponseError {
-	return New(
+	return NewError(
 		http.StatusBadRequest,
 		"INVALID_INPUT",
 		"Add required field",
@@ -68,7 +68,7 @@ func InvalidInputMassage(err error) ResponseError {
 }
 
 func NotAuthMassage(err error) ResponseError {
-	return New(
+	return NewError(
 		http.StatusUnauthorized,
 		"NOT_AUTHORIZED",
 		"Add auth data",
@@ -77,7 +77,7 @@ func NotAuthMassage(err error) ResponseError {
 }
 
 func ForbiddenMassage(err error) ResponseError {
-	return New(
+	return NewError(
 		http.StatusForbidden,
 		"INVALID_AUTHORIZED_DATA",
 		"Change auth data",
@@ -86,7 +86,7 @@ func ForbiddenMassage(err error) ResponseError {
 }
 
 func InternalErrorMassage(err error) ResponseError {
-	return New(
+	return NewError(
 		http.StatusInternalServerError,
 		"INTERNAL",
 		"Internal Server Error",
