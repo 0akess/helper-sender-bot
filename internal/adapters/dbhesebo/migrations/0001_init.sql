@@ -48,18 +48,15 @@ CREATE TABLE IF NOT EXISTS config_gitlab
 (
     team_name            TEXT        NOT NULL,
     channel_id           TEXT        NOT NULL,
-
     git_url              TEXT        NOT NULL,
     git_project_id       INT         NOT NULL,
     git_project_name     TEXT        NOT NULL,
-
     reviewers            TEXT[]      NOT NULL,
     reviewers_count      SMALLINT    NOT NULL,
     ttl_review           JSONB,
     qa_reviewers         TEXT,
     requires_qa_review   BOOL,
     push_qa_after_review BOOL,
-
     create_at            TIMESTAMPTZ NOT NULL,
     update_at            TIMESTAMPTZ NOT NULL,
 
@@ -92,7 +89,7 @@ CREATE TABLE IF NOT EXISTS posts_git_mr
     PRIMARY KEY (git_url, git_project_id, git_mr_id)
 );
 CREATE INDEX IF NOT EXISTS ix_posts_git_mr_update_at ON posts_git_mr (create_at);
-CREATE INDEX IF NOT EXISTS ix_posts_git_mr_team_channel ON posts_git_mr (team_name, channel_id);
+CREATE INDEX IF NOT EXISTS ix_posts_git_mr_team_channel_project_id ON posts_git_mr (team_name, channel_id, git_project_id);
 
 -- +goose Down
 drop table if exists config_gitlab;

@@ -9,14 +9,14 @@ import (
 func (s *Sender) SendDayPing(ctx context.Context) {
 	layout := "2006-01-02"
 
-	cacheGit, err := s.repo.GetAllGitlabConfigs(ctx)
+	gitCfg, err := s.repo.GetAllGitlabConfigs(ctx)
 	if err != nil {
 		s.log.Warn("Ошибка получения записей gitlab конфигураций", "error", err)
 		return
 	}
 
-	for _, cfg := range cacheGit {
-		postsGitMr, err := s.repo.GetListPostGitMR(ctx, cfg.Team, cfg.ChannelID)
+	for _, cfg := range gitCfg {
+		postsGitMr, err := s.repo.GetListPostGitMR(ctx, cfg.Team, cfg.ChannelID, cfg.ProjectID)
 		if err != nil {
 			s.log.Warn("Ошибка получения записей из posts_git_mr", "error", err)
 		}

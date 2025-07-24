@@ -22,7 +22,7 @@ type repo interface {
 	DeletePostGitMR(ctx context.Context, gitURL string, projectID, mrID int) error
 	GetPostGitMR(ctx context.Context, gitURL string, projectID, mrID int) (entity.PostGitMR, error)
 	UpdatePostGitMRPushed(ctx context.Context, gitURL string, projectID, mrID int) error
-	GetListPostGitMR(ctx context.Context, team, channel string) ([]entity.PostGitMR, error)
+	GetListPostGitMR(ctx context.Context, team, channel string, gitProjectID int) ([]entity.PostGitMR, error)
 }
 
 type Sender struct {

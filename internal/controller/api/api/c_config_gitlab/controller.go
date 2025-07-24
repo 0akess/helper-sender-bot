@@ -19,14 +19,12 @@ type auth interface {
 }
 
 type Controller struct {
-	ctx       context.Context
 	gitlabCfg gitlabCfg
 	auth      auth
 }
 
-func NewControllerCfgGit(ctx context.Context, gitlabCfg gitlabCfg, auth auth) *Controller {
+func NewControllerCfgGit(gitlabCfg gitlabCfg, auth auth) *Controller {
 	return &Controller{
-		ctx:       ctx,
 		gitlabCfg: gitlabCfg,
 		auth:      auth,
 	}

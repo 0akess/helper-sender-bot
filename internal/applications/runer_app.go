@@ -76,7 +76,6 @@ func RunApp(cfgL *config.Logger) int {
 	}
 
 	db, err := dbhesebo.NewDB(ctx, cfgP, appLogger)
-	defer db.Close()
 	if err != nil {
 		appLogger.Error("Failed to initialize database", "err", err)
 		return 1
@@ -95,9 +94,9 @@ func RunApp(cfgL *config.Logger) int {
 
 	echo := api.InitEcho(appLogger, cfgA.Timeout)
 
-	chatCon.NewControllerCfgDuty(ctx, ucChatConfigs, ucAuth).RegisterRoutes(echo)
-	teamCon.NewControllerTeam(ctx, ucTeams, ucAuth).RegisterRoutes(echo)
-	gitCon.NewControllerCfgGit(ctx, ucGitConfigs, ucAuth).RegisterRoutes(echo)
+	chatCon.NewControllerCfgDuty(ucChatConfigs, ucAuth).RegisterRoutes(echo)
+	teamCon.NewControllerTeam(ucTeams, ucAuth).RegisterRoutes(echo)
+	gitCon.NewControllerCfgGit(ucGitConfigs, ucAuth).RegisterRoutes(echo)
 	webhook.NewControllerGitlab(ctx, ucGitBot, cfgA.WebhookToken).RegisterRoutes(echo)
 
 	go func() {
@@ -108,12 +107,15 @@ func RunApp(cfgL *config.Logger) int {
 
 	<-ctx.Done()
 
-	err = echo.Shutdown(ctx)
-	if err != nil {
+	shutdownCtx, shutdownCancel := context.WithTimeout(ctx, cfgA.Timeout)
+	defer shutdownCancel()
+
+	if err = echo.Shutdown(shutdownCtx); err != nil {
 		appLogger.Error("server failed to shutdown", "err", err)
 		return 1
 	}
 	appLogger.Info("server shutdown")
 
+	db.Close()
 	return 0
 }

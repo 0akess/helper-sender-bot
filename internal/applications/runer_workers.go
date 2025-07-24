@@ -66,11 +66,12 @@ func RunWorker(cfgL *config.Logger) int {
 	}
 
 	db, err := dbhesebo.NewDB(ctx, cfgP, appLogger)
-	defer db.Close()
 	if err != nil {
 		appLogger.Error("Failed to initialize database", "err", err)
 		return 1
 	}
+	defer db.Close()
+
 	repo := dbhesebo.NewStorage(db)
 
 	mmClient := mattermost.New(cfgB.MattermostBase, cfgB.Token, appLogger)

@@ -34,7 +34,6 @@ func RunMigrate(cfg *config.Logger) int {
 	}
 
 	pool, err := r.NewDB(ctx, cfgP, appLogger)
-	defer pool.Close()
 	if err != nil {
 		appLogger.Error("Failed to initialize database", "err", err)
 		return 1
@@ -58,5 +57,6 @@ func RunMigrate(cfg *config.Logger) int {
 		return 1
 	}
 	appLogger.Info("Goose command executed successfully", "command", cfgP.Command)
+	pool.Close()
 	return 0
 }

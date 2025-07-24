@@ -101,7 +101,11 @@ func (r *Pgx) GetPostGitMR(ctx context.Context, gitURL string, projectID, mrID i
 	return p, err
 }
 
-func (r *Pgx) GetListPostGitMR(ctx context.Context, team, channel string) ([]entity.PostGitMR, error) {
+func (r *Pgx) GetListPostGitMR(
+	ctx context.Context,
+	team, channel string,
+	gitProjectID int,
+) ([]entity.PostGitMR, error) {
 	sqlStr, args, err := r.sb.
 		Select(
 			"team_name",
@@ -117,8 +121,9 @@ func (r *Pgx) GetListPostGitMR(ctx context.Context, team, channel string) ([]ent
 		).
 		From("posts_git_mr").
 		Where(sq.Eq{
-			"team_name":  team,
-			"channel_id": channel,
+			"team_name":      team,
+			"channel_id":     channel,
+			"git_project_id": gitProjectID,
 		}).
 		OrderBy("create_at DESC").
 		ToSql()

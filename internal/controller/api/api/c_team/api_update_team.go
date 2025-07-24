@@ -20,7 +20,7 @@ func (t *Controller) updateTeam(e echo.Context) error {
 		return responses.NotAuthMassage(err)
 	}
 
-	err = t.auth.CheckAuth(t.ctx, auth)
+	err = t.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
 		return responses.ForbiddenMassage(err)
 	}
@@ -37,7 +37,7 @@ func (t *Controller) updateTeam(e echo.Context) error {
 		LeadEID: req.NewLeadEID,
 	}
 
-	err = t.team.UpdateTeam(t.ctx, newTeam, auth.Team, auth.Token)
+	err = t.team.UpdateTeam(e.Request().Context(), newTeam, auth.Team, auth.Token)
 	if err != nil {
 		return responses.InternalErrorMassage(err)
 	}

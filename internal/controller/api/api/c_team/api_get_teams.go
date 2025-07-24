@@ -28,7 +28,7 @@ func (t *Controller) getTeam(e echo.Context) error {
 		query.Limit = 10
 	}
 
-	teams, nextCursor, err := t.team.GetTeams(t.ctx, query.Limit, query.Cursor-1, query.SearchTeamName)
+	teams, nextCursor, err := t.team.GetTeams(e.Request().Context(), query.Limit, query.Cursor-1, query.SearchTeamName)
 	if err != nil {
 		return responses.InternalErrorMassage(err)
 	}

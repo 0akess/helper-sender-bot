@@ -65,10 +65,17 @@ func getSlaAndSizeMRLine(cfg entity.GitlabConfig, mrInfo entity.MergeRequestInfo
 			sla := rule.SLA
 			hours := sla / 60
 			minutes := sla % 60
-			slaMsg = fmt.Sprintf(
-				"\n**Размер МР и SLA**: %s %d часов %d мин\n",
-				rule.MRSizeName, hours, minutes,
-			)
+			if hours == 0 {
+				slaMsg = fmt.Sprintf(
+					"\n**Размер МР и SLA**: %s | %d мин\n",
+					rule.MRSizeName, minutes,
+				)
+			} else {
+				slaMsg = fmt.Sprintf(
+					"\n**Размер МР и SLA**: %s | %d часов %d мин\n",
+					rule.MRSizeName, hours, minutes,
+				)
+			}
 		}
 	}
 	return slaMsg, rule

@@ -27,7 +27,7 @@ func (dp *DayPinger) RunGoSendDayPinger(ctx context.Context) {
 
 			next := time.Date(
 				now.Year(), now.Month(), now.Day(),
-				14, 0, 0, 0, msk,
+				8, 56, 0, 0, msk,
 			)
 			if !next.After(now) {
 				next = next.Add(24 * time.Hour)

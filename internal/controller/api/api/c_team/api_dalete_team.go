@@ -13,12 +13,12 @@ func (t *Controller) deleteTeam(e echo.Context) error {
 		return responses.NotAuthMassage(err)
 	}
 
-	err = t.auth.CheckAuth(t.ctx, auth)
+	err = t.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
 		return responses.ForbiddenMassage(err)
 	}
 
-	err = t.team.DeleteTeam(t.ctx, auth.Team, auth.Token)
+	err = t.team.DeleteTeam(e.Request().Context(), auth.Team, auth.Token)
 	if err != nil {
 		return responses.InternalErrorMassage(err)
 	}

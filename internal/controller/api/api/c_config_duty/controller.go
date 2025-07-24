@@ -19,14 +19,12 @@ type auth interface {
 }
 
 type CfgDutyController struct {
-	ctx     context.Context
 	dutyCfg dutyCfg
 	auth    auth
 }
 
-func NewControllerCfgDuty(ctx context.Context, dutyCfg dutyCfg, auth auth) *CfgDutyController {
+func NewControllerCfgDuty(dutyCfg dutyCfg, auth auth) *CfgDutyController {
 	return &CfgDutyController{
-		ctx:     ctx,
 		dutyCfg: dutyCfg,
 		auth:    auth,
 	}

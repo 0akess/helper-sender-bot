@@ -20,14 +20,12 @@ type auth interface {
 }
 
 type Controller struct {
-	ctx  context.Context
 	team team
 	auth auth
 }
 
-func NewControllerTeam(ctx context.Context, team team, ucAuth auth) *Controller {
+func NewControllerTeam(team team, ucAuth auth) *Controller {
 	return &Controller{
-		ctx:  ctx,
 		team: team,
 		auth: ucAuth,
 	}

@@ -29,7 +29,7 @@ func (t *Controller) createTeam(e echo.Context) error {
 		Token:   req.Token,
 	}
 
-	err := t.team.CreateTeam(t.ctx, team)
+	err := t.team.CreateTeam(e.Request().Context(), team)
 	if err != nil {
 		return responses.InternalErrorMassage(err)
 	}
