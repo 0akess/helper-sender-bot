@@ -42,7 +42,7 @@ func (c *Controller) putGitCfg(e echo.Context) error {
 	}
 
 	var ttlReview []entity.TTLReviewItem
-	if req.TTLReview != nil && len(req.TTLReview) > 0 {
+	if len(req.TTLReview) > 0 {
 		ttlReview, err = checkAndBuildTTLReview(req.TTLReview)
 		if err != nil {
 			return responses.InvalidInputMessage(err)
