@@ -17,10 +17,10 @@ type teamReq struct {
 func (t *Controller) createTeam(e echo.Context) error {
 	var req teamReq
 	if err := e.Bind(&req); err != nil {
-		return responses.InvalidInputMassage(err)
+		return responses.InvalidInputMessage(err)
 	}
 	if err := e.Validate(req); err != nil {
-		return responses.InvalidInputMassage(err)
+		return responses.InvalidInputMessage(err)
 	}
 
 	team := entity.Team{
@@ -31,7 +31,7 @@ func (t *Controller) createTeam(e echo.Context) error {
 
 	err := t.team.CreateTeam(e.Request().Context(), team)
 	if err != nil {
-		return responses.InternalErrorMassage(err)
+		return responses.InternalErrorMessage(err)
 	}
 	return e.JSON(http.StatusCreated, map[string]bool{"success": true})
 }

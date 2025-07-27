@@ -17,19 +17,19 @@ type updateTeamReq struct {
 func (t *Controller) updateTeam(e echo.Context) error {
 	auth, err := middleware.GetAuth(e)
 	if err != nil {
-		return responses.NotAuthMassage(err)
+		return responses.NotAuthMessage(err)
 	}
 
 	err = t.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
-		return responses.ForbiddenMassage(err)
+		return responses.ForbiddenMessage(err)
 	}
 	var req updateTeamReq
 	if err := e.Bind(&req); err != nil {
-		return responses.InvalidInputMassage(err)
+		return responses.InvalidInputMessage(err)
 	}
 	if err := e.Validate(req); err != nil {
-		return responses.InvalidInputMassage(err)
+		return responses.InvalidInputMessage(err)
 	}
 
 	newTeam := entity.Team{
@@ -39,7 +39,7 @@ func (t *Controller) updateTeam(e echo.Context) error {
 
 	err = t.team.UpdateTeam(e.Request().Context(), newTeam, auth.Team, auth.Token)
 	if err != nil {
-		return responses.InternalErrorMassage(err)
+		return responses.InternalErrorMessage(err)
 	}
 	return e.JSON(http.StatusOK, map[string]bool{"success": true})
 }

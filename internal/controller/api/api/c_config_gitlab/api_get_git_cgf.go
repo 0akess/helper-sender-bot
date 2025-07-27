@@ -23,17 +23,17 @@ type getGitlabConfigRes struct {
 func (c *Controller) getGitCfg(e echo.Context) error {
 	auth, err := middleware.GetAuth(e)
 	if err != nil {
-		return responses.NotAuthMassage(err)
+		return responses.NotAuthMessage(err)
 	}
 
 	err = c.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
-		return responses.ForbiddenMassage(err)
+		return responses.ForbiddenMessage(err)
 	}
 
 	gitCfg, err := c.gitlabCfg.GetGitlabConfigs(e.Request().Context(), auth.Team)
 	if err != nil {
-		return responses.InternalErrorMassage(err)
+		return responses.InternalErrorMessage(err)
 	}
 
 	if len(gitCfg) == 0 {

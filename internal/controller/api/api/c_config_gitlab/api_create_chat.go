@@ -16,7 +16,7 @@ type createGitlabConfig struct {
 	ChannelID         string          `json:"channel_id" validate:"required"`
 	Reviewers         []string        `json:"reviewers" validate:"required,min=1,dive,required"`
 	ReviewersCount    int             `json:"reviewers_count" validate:"required,min=1"`
-	TTLReview         []ttlReviewItem `json:"ttl_review" validate:"required,min=1,dive"`
+	TTLReview         []ttlReviewItem `json:"ttl_review"`
 	QAReviewers       string          `json:"qa_reviewers,omitempty"`
 	RequiresQaReview  bool            `json:"requires_qa_review,omitempty"`
 	PushQaAfterReview bool            `json:"push_qa_after_review,omitempty"`
@@ -25,32 +25,35 @@ type createGitlabConfig struct {
 func (c *Controller) createGitCfg(e echo.Context) error {
 	auth, err := middleware.GetAuth(e)
 	if err != nil {
-		return responses.NotAuthMassage(err)
+		return responses.NotAuthMessage(err)
 	}
 
 	err = c.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
-		return responses.ForbiddenMassage(err)
+		return responses.ForbiddenMessage(err)
 	}
 
 	var req createGitlabConfig
 	if err := e.Bind(&req); err != nil {
-		return responses.InvalidInputMassage(err)
+		return responses.InvalidInputMessage(err)
 	}
 
 	if err := e.Validate(req); err != nil {
-		return responses.InvalidInputMassage(err)
+		return responses.InvalidInputMessage(err)
 	}
 
 	if (req.RequiresQaReview || req.PushQaAfterReview) && req.QAReviewers == "" {
-		return responses.InvalidInputMassage(
+		return responses.InvalidInputMessage(
 			fmt.Errorf("qa_reviewers is required for requires_qa_review or push_qa_after_review"),
 		)
 	}
 
-	ttlReview, err, ok := checkAndBuildTTLReview(req.TTLReview)
-	if !ok {
-		return responses.InvalidInputMassage(err)
+	var ttlReview []entity.TTLReviewItem
+	if req.TTLReview != nil && len(req.TTLReview) > 0 {
+		ttlReview, err = checkAndBuildTTLReview(req.TTLReview)
+		if err != nil {
+			return responses.InvalidInputMessage(err)
+		}
 	}
 
 	git := entity.GitlabConfig{
@@ -69,7 +72,7 @@ func (c *Controller) createGitCfg(e echo.Context) error {
 
 	err = c.gitlabCfg.CreateGitlabConfig(e.Request().Context(), git)
 	if err != nil {
-		return responses.InternalErrorMassage(err)
+		return responses.InternalErrorMessage(err)
 	}
 	return e.JSON(http.StatusCreated, map[string]bool{"success": true})
 }

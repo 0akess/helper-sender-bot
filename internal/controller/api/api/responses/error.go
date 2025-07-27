@@ -58,7 +58,7 @@ func BuildDetails(err error) map[string]string {
 	return details
 }
 
-func InvalidInputMassage(err error) ResponseError {
+func InvalidInputMessage(err error) ResponseError {
 	return NewError(
 		http.StatusBadRequest,
 		"INVALID_INPUT",
@@ -67,7 +67,7 @@ func InvalidInputMassage(err error) ResponseError {
 	)
 }
 
-func NotAuthMassage(err error) ResponseError {
+func NotAuthMessage(err error) ResponseError {
 	return NewError(
 		http.StatusUnauthorized,
 		"NOT_AUTHORIZED",
@@ -76,7 +76,7 @@ func NotAuthMassage(err error) ResponseError {
 	)
 }
 
-func ForbiddenMassage(err error) ResponseError {
+func ForbiddenMessage(err error) ResponseError {
 	return NewError(
 		http.StatusForbidden,
 		"INVALID_AUTHORIZED_DATA",
@@ -85,7 +85,7 @@ func ForbiddenMassage(err error) ResponseError {
 	)
 }
 
-func InternalErrorMassage(err error) ResponseError {
+func InternalErrorMessage(err error) ResponseError {
 	return NewError(
 		http.StatusInternalServerError,
 		"INTERNAL",

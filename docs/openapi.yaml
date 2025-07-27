@@ -65,7 +65,6 @@ components:
       - channel_id
       - reviewers
       - reviewers_count
-      - ttl_review
       type: object
     TTLReviewItem:
       properties:
@@ -125,7 +124,7 @@ openapi: 3.0.3
 paths:
   /gitlab/webhook/mr_info:
     post:
-      description: Endpoint for GitLab to push MR events. No authentication.
+      description: Endpoint for GitLab to push MR events.
       requestBody:
         content:
           application/json:

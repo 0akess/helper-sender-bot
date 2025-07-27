@@ -13,17 +13,17 @@ type ttlReviewItem struct {
 	MRSizeName string `json:"mr_size_name"`
 }
 
-func checkAndBuildTTLReview(req []ttlReviewItem) ([]entity.TTLReviewItem, error, bool) {
+func checkAndBuildTTLReview(req []ttlReviewItem) ([]entity.TTLReviewItem, error) {
 	ttlReview := make([]entity.TTLReviewItem, len(req))
 	for i, v := range req {
 		if v.SLA <= 0 {
-			return nil, fmt.Errorf("sla should be represented as element of object ttl_review"), false
+			return nil, fmt.Errorf("sla should be represented as element of object ttl_review")
 		}
 		if v.MRSize <= 0 {
-			return nil, fmt.Errorf("mr_size should be represented as element of object ttl_review"), false
+			return nil, fmt.Errorf("mr_size should be represented as element of object ttl_review")
 		}
 		if v.MRSizeName == "" {
-			return nil, fmt.Errorf("mr_size_name should be represented as element of object ttl_review"), false
+			return nil, fmt.Errorf("mr_size_name should be represented as element of object ttl_review")
 		}
 		ttlReview[i] = entity.TTLReviewItem{
 			SLA:        v.SLA,
@@ -31,7 +31,7 @@ func checkAndBuildTTLReview(req []ttlReviewItem) ([]entity.TTLReviewItem, error,
 			MRSizeName: v.MRSizeName,
 		}
 	}
-	return ttlReview, nil, true
+	return ttlReview, nil
 }
 
 func toGetTTL(src []entity.TTLReviewItem) []ttlReviewItem {

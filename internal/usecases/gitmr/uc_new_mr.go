@@ -21,6 +21,7 @@ func (gm *GitMR) SendPushNewMR(ctx context.Context, mr entity.MergeRequestPayloa
 	if !exist && mr.IsDraft {
 		return
 	}
+
 	if exist && mr.IsDraft {
 		err = gm.repo.UpdatePostGitMRIsDraft(ctx, gitUrl, mr.ProjectID, mr.MrID, mr.IsDraft)
 		if err != nil {
@@ -30,24 +31,23 @@ func (gm *GitMR) SendPushNewMR(ctx context.Context, mr entity.MergeRequestPayloa
 		return
 	}
 
-	if exist && !mr.IsDraft {
-		post, err := gm.repo.GetPostGitMR(ctx, gitUrl, mr.ProjectID, mr.MrID)
+	post, err := gm.repo.GetPostGitMR(ctx, gitUrl, mr.ProjectID, mr.MrID)
+	if err != nil {
+		gm.log.Error("Ошибка получения posts_git_mr", "error", err)
+		return
+	}
+
+	if exist && !mr.IsDraft && post.IsDraft {
+		err = gm.repo.UpdatePostGitMRIsDraft(ctx, gitUrl, mr.ProjectID, mr.MrID, mr.IsDraft)
 		if err != nil {
-			gm.log.Error("Ошибка получения posts_git_mr", "error", err)
+			gm.log.Error("Ошибка обновления is_draft", "error", err)
 			return
 		}
-		if post.IsDraft {
-			err = gm.repo.UpdatePostGitMRIsDraft(ctx, gitUrl, mr.ProjectID, mr.MrID, mr.IsDraft)
-			if err != nil {
-				gm.log.Error("Ошибка обновления is_draft", "error", err)
-				return
-			}
-			msg := fmt.Sprintf("MR вышел из состояния драфта, можно смотреть %s", post.Reviewers)
-			_, _, err = gm.clientMM.CreatePost(ctx, gitCfg.ChannelID, msg, post.PostID)
-			if err != nil {
-				gm.log.Error("CreatePost при MR != Draft", "error", err)
-				return
-			}
+		msg := fmt.Sprintf("%s \nMR вышел из состояния драфта, можно смотреть", post.Reviewers)
+		_, _, err = gm.clientMM.CreatePost(ctx, gitCfg.ChannelID, msg, post.PostID)
+		if err != nil {
+			gm.log.Error("CreatePost при MR != Draft", "error", err)
+			return
 		}
 		return
 	}

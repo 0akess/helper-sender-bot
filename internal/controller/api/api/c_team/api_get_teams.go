@@ -15,10 +15,10 @@ type getAllTeamQuery struct {
 func (t *Controller) getTeam(e echo.Context) error {
 	var query getAllTeamQuery
 	if err := e.Bind(&query); err != nil {
-		return responses.InvalidInputMassage(err)
+		return responses.InvalidInputMessage(err)
 	}
 	if err := e.Validate(query); err != nil {
-		return responses.InvalidInputMassage(err)
+		return responses.InvalidInputMessage(err)
 	}
 
 	if query.Cursor <= 0 {
@@ -30,7 +30,7 @@ func (t *Controller) getTeam(e echo.Context) error {
 
 	teams, nextCursor, err := t.team.GetTeams(e.Request().Context(), query.Limit, query.Cursor-1, query.SearchTeamName)
 	if err != nil {
-		return responses.InternalErrorMassage(err)
+		return responses.InternalErrorMessage(err)
 	}
 
 	if len(teams) == 0 {

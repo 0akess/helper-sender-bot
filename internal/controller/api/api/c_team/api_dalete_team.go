@@ -10,17 +10,17 @@ import (
 func (t *Controller) deleteTeam(e echo.Context) error {
 	auth, err := middleware.GetAuth(e)
 	if err != nil {
-		return responses.NotAuthMassage(err)
+		return responses.NotAuthMessage(err)
 	}
 
 	err = t.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
-		return responses.ForbiddenMassage(err)
+		return responses.ForbiddenMessage(err)
 	}
 
 	err = t.team.DeleteTeam(e.Request().Context(), auth.Team, auth.Token)
 	if err != nil {
-		return responses.InternalErrorMassage(err)
+		return responses.InternalErrorMessage(err)
 	}
 	return e.JSON(http.StatusNoContent, map[string]bool{"success": true})
 }

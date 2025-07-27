@@ -20,30 +20,33 @@ type putGitlabConfig struct {
 func (c *Controller) putGitCfg(e echo.Context) error {
 	auth, err := middleware.GetAuth(e)
 	if err != nil {
-		return responses.NotAuthMassage(err)
+		return responses.NotAuthMessage(err)
 	}
 
 	err = c.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
-		return responses.ForbiddenMassage(err)
+		return responses.ForbiddenMessage(err)
 	}
 
 	gitURL, projectID, err := gitUrlAndIdQuery(e)
 	if err != nil {
-		return responses.InvalidInputMassage(err)
+		return responses.InvalidInputMessage(err)
 	}
 
 	var req putGitlabConfig
 	if err := e.Bind(&req); err != nil {
-		return responses.InvalidInputMassage(err)
+		return responses.InvalidInputMessage(err)
 	}
 	if err := e.Validate(&req); err != nil {
-		return responses.InvalidInputMassage(err)
+		return responses.InvalidInputMessage(err)
 	}
 
-	ttlReview, err, ok := checkAndBuildTTLReview(req.TTLReview)
-	if !ok {
-		return responses.InvalidInputMassage(err)
+	var ttlReview []entity.TTLReviewItem
+	if req.TTLReview != nil && len(req.TTLReview) > 0 {
+		ttlReview, err = checkAndBuildTTLReview(req.TTLReview)
+		if err != nil {
+			return responses.InvalidInputMessage(err)
+		}
 	}
 
 	git := entity.GitlabConfig{
@@ -58,7 +61,7 @@ func (c *Controller) putGitCfg(e echo.Context) error {
 
 	err = c.gitlabCfg.UpdateGitlabConfig(e.Request().Context(), git, projectID, gitURL)
 	if err != nil {
-		return responses.InternalErrorMassage(err)
+		return responses.InternalErrorMessage(err)
 	}
 	return e.NoContent(http.StatusOK)
 }

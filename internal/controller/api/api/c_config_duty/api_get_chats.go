@@ -20,17 +20,17 @@ type getChatsResponse struct {
 func (c *CfgDutyController) getChats(e echo.Context) error {
 	auth, err := middleware.GetAuth(e)
 	if err != nil {
-		return responses.NotAuthMassage(err)
+		return responses.NotAuthMessage(err)
 	}
 
 	err = c.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
-		return responses.ForbiddenMassage(err)
+		return responses.ForbiddenMessage(err)
 	}
 
 	chats, err := c.dutyCfg.GetListDutyCfgByTeam(e.Request().Context(), auth.Team)
 	if err != nil {
-		return responses.InternalErrorMassage(err)
+		return responses.InternalErrorMessage(err)
 	}
 
 	if len(chats) == 0 {

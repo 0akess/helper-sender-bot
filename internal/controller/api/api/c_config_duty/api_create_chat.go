@@ -21,21 +21,21 @@ type createChatReq struct {
 func (c *CfgDutyController) createChat(e echo.Context) error {
 	auth, err := middleware.GetAuth(e)
 	if err != nil {
-		return responses.NotAuthMassage(err)
+		return responses.NotAuthMessage(err)
 	}
 
 	err = c.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
-		return responses.ForbiddenMassage(err)
+		return responses.ForbiddenMessage(err)
 	}
 
 	var req createChatReq
 	if err := e.Bind(&req); err != nil {
-		return responses.InvalidInputMassage(err)
+		return responses.InvalidInputMessage(err)
 	}
 
 	if err := e.Validate(req); err != nil {
-		return responses.InvalidInputMassage(err)
+		return responses.InvalidInputMessage(err)
 	}
 
 	chat := entity.Chat{
@@ -50,7 +50,7 @@ func (c *CfgDutyController) createChat(e echo.Context) error {
 
 	err = c.dutyCfg.CreateDutyCfg(e.Request().Context(), chat, auth.Team)
 	if err != nil {
-		return responses.InternalErrorMassage(err)
+		return responses.InternalErrorMessage(err)
 	}
 	return e.JSON(http.StatusCreated, map[string]bool{"success": true})
 }

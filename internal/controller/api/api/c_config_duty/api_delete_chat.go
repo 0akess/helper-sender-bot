@@ -11,21 +11,21 @@ import (
 func (c *CfgDutyController) deleteChat(e echo.Context) error {
 	auth, err := middleware.GetAuth(e)
 	if err != nil {
-		return responses.NotAuthMassage(err)
+		return responses.NotAuthMessage(err)
 	}
 
 	err = c.auth.CheckAuth(e.Request().Context(), auth)
 	if err != nil {
-		return responses.ForbiddenMassage(err)
+		return responses.ForbiddenMessage(err)
 	}
 
 	channel := e.QueryParam("channel")
 	if channel == "" {
-		return responses.InvalidInputMassage(fmt.Errorf("query 'channel' is required"))
+		return responses.InvalidInputMessage(fmt.Errorf("query 'channel' is required"))
 	}
 
 	if err := c.dutyCfg.DeleteDutyCfg(e.Request().Context(), channel, auth.Team); err != nil {
-		return responses.InternalErrorMassage(err)
+		return responses.InternalErrorMessage(err)
 	}
 	return e.NoContent(http.StatusNoContent)
 }
