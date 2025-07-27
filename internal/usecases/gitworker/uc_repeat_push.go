@@ -24,6 +24,11 @@ func (gw *GitWorker) SendRepeatPush(ctx context.Context) {
 			if post.IsDraft {
 				continue
 			}
+
+			if post.TTLReview.SLA == 0 {
+				continue
+			}
+
 			ageSinceCreate := time.Since(post.UpdateAT)
 			sla := time.Duration(post.TTLReview.SLA) * time.Minute
 			if ageSinceCreate < sla || post.PushedReview {

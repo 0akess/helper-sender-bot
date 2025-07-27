@@ -15,14 +15,11 @@ type clientGit interface {
 }
 
 type repo interface {
-	GetAllGitlabConfigs(ctx context.Context) ([]entity.GitlabConfig, error)
 	GetGitlabConfig(ctx context.Context, projectID int, gitUrl string) (entity.GitlabConfig, error)
 	CreatePostGitMR(ctx context.Context, p entity.PostGitMR) error
 	ExistsPostGitMR(ctx context.Context, gitURL string, projectID, mrID int) (bool, error)
 	DeletePostGitMR(ctx context.Context, gitURL string, projectID, mrID int) error
 	GetPostGitMR(ctx context.Context, gitURL string, projectID, mrID int) (entity.PostGitMR, error)
-	UpdatePostGitMRPushed(ctx context.Context, gitURL string, projectID, mrID int) error
-	GetListPostGitMR(ctx context.Context, team, channel string, gitProjectID int) ([]entity.PostGitMR, error)
 	UpdatePostGitMRIsDraft(ctx context.Context, gitURL string, projectID, mrID int, isDraft bool) error
 }
 
