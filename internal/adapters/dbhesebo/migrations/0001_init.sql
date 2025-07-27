@@ -82,6 +82,8 @@ CREATE TABLE IF NOT EXISTS posts_git_mr
     git_project_id INT         NOT NULL,
     git_mr_id      INT         NOT NULL,
     create_at      TIMESTAMPTZ NOT NULL,
+    update_at      TIMESTAMPTZ NOT NULL,
+    is_draft       BOOL DEFAULT FALSE,
     pushed_review  BOOL DEFAULT FALSE,
     ttl_review     JSONB       NOT NULL,
     reviewers      TEXT        NOT NULL,

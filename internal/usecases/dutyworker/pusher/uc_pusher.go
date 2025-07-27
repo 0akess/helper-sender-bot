@@ -48,7 +48,7 @@ func (s *Sender) PusherBot(ctx context.Context) {
 	}
 
 	for _, cfg := range channels {
-		if s.isNotWorkingHours(cfg) {
+		if cfg.IsNotWorkingHours() {
 			return
 		}
 

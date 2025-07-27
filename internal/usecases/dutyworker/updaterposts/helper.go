@@ -61,21 +61,20 @@ func (pi *PostInfo) fetchAndStore(ctx context.Context, channelID string, cfg ent
 	}
 }
 
-// processBatch сохраняет в БД только «топ-левел» посты, пропуская системные, внутри-тредовые и закрытые.
+// processBatch сохраняет в БД только топ-левел посты, пропуская системные, внутри-тредовые и закрытые.
 func (pi *PostInfo) processBatch(ctx context.Context, channelID string, cfg entity.Chat, batch []entity.Post) {
 	for _, p := range batch {
 		if p.RootId != "" || p.Type != "" {
 			continue
 		}
-		if reaction(p, cfg.EmojiDone) {
-
+		if p.IsExistReaction(cfg.EmojiDone) {
 			err := pi.repo.DeletePostDuty(ctx, channelID, p.ID)
 			if err != nil {
 				pi.log.Error("delete post", "channel", channelID, "root_id", p.RootId, "err", err)
 			}
 			continue
 		}
-		inProgress := reaction(p, cfg.EmojiStart)
+		inProgress := p.IsExistReaction(cfg.EmojiStart)
 
 		createdAt := time.UnixMilli(p.CreateAt)
 
@@ -84,21 +83,4 @@ func (pi *PostInfo) processBatch(ctx context.Context, channelID string, cfg enti
 			pi.log.Error("CreatePostDuty", "channel", channelID, "post", p.ID, "err", err)
 		}
 	}
-}
-
-// reaction позволяет сверить реакции из поста и переданный name
-func reaction(p entity.Post, name string) bool {
-	for _, r := range p.Metadata.Reactions {
-		if r.EmojiName == name {
-			return true
-		}
-	}
-	return false
-}
-
-// isWorkingHours фильтр позволяющий ограничить в какие часы можно слать уведомления
-func (pi *PostInfo) isNotWorkingHours(cfg entity.Chat) bool {
-	msk := time.FixedZone("MSK", 3*60*60)
-	h := time.Now().In(msk).Hour()
-	return h < cfg.WorkdayStart || h >= cfg.WorkdayEnd
 }

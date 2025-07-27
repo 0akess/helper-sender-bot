@@ -39,7 +39,7 @@ func (c *Client) GetMRInfo(
 	if !ok {
 		return entity.MergeRequestInfo{}, fmt.Errorf("client not found for %s", baseURL)
 	}
-	diffs, _, err := client.gl.MergeRequests.ListMergeRequestDiffs(p.ProjectID, p.MRIID, nil, gitlab.WithContext(ctx))
+	diffs, _, err := client.gl.MergeRequests.ListMergeRequestDiffs(p.ProjectID, p.MrID, nil, gitlab.WithContext(ctx))
 	if err != nil {
 		return entity.MergeRequestInfo{}, fmt.Errorf("fetch MR diffs: %w", err)
 	}

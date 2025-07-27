@@ -3,14 +3,13 @@ package wh_gitlab
 import (
 	"github.com/labstack/echo/v4"
 	"helper-sender-bot/internal/entity"
-	"log/slog"
 	"net/http"
 )
 
 type mergeRequestPayload struct {
 	ProjectID      int    `json:"project_id"`
 	ProjectName    string `json:"project_name"`
-	MRIID          int    `json:"mr_iid"`
+	MrID           int    `json:"mr_iid"`
 	MRTitle        string `json:"mr_title"`
 	SourceBranch   string `json:"source_branch"`
 	TargetBranch   string `json:"target_branch"`
@@ -22,11 +21,6 @@ type mergeRequestPayload struct {
 }
 
 func (gc *GitlabController) handleGitlabWebhook(e echo.Context) error {
-	token := e.Request().Header.Get("X-Gitlab-Token")
-	if token != gc.token {
-		slog.Warn("GitLab webhook: invalid secret", "provided", token)
-		return e.NoContent(http.StatusUnauthorized)
-	}
 
 	var req mergeRequestPayload
 	if err := e.Bind(&req); err != nil {
@@ -36,7 +30,7 @@ func (gc *GitlabController) handleGitlabWebhook(e echo.Context) error {
 	body := entity.MergeRequestPayload{
 		ProjectID:      req.ProjectID,
 		ProjectName:    req.ProjectName,
-		MRIID:          req.MRIID,
+		MrID:           req.MrID,
 		MRTitle:        req.MRTitle,
 		SourceBranch:   req.SourceBranch,
 		TargetBranch:   req.TargetBranch,
@@ -46,8 +40,11 @@ func (gc *GitlabController) handleGitlabWebhook(e echo.Context) error {
 		IsDraft:        req.IsDraft,
 		MRState:        req.MRState,
 	}
-	if body.IsDraft {
-		return e.NoContent(http.StatusOK)
+
+	token := e.Request().Header.Get("X-Gitlab-Token")
+	if token != gc.token {
+		gc.log.Warn("GitLab webhook: invalid secret", "projectID", body.ProjectID, "projectName", body.ProjectName)
+		return e.NoContent(http.StatusUnauthorized)
 	}
 
 	switch body.MRState {

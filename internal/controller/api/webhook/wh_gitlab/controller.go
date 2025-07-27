@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/labstack/echo/v4"
 	"helper-sender-bot/internal/entity"
+	"log/slog"
 )
 
 type pushMR interface {
@@ -15,13 +16,15 @@ type pushMR interface {
 type GitlabController struct {
 	ctx    context.Context
 	pushMR pushMR
+	log    *slog.Logger
 	token  string
 }
 
-func NewControllerGitlab(ctx context.Context, pushMR pushMR, token string) *GitlabController {
+func NewControllerGitlab(ctx context.Context, pushMR pushMR, log *slog.Logger, token string) *GitlabController {
 	c := &GitlabController{
 		ctx:    ctx,
 		pushMR: pushMR,
+		log:    log,
 		token:  token,
 	}
 	return c

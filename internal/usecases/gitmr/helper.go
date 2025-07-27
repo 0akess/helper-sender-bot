@@ -1,4 +1,4 @@
-package gitworker
+package gitmr
 
 import (
 	"context"
@@ -12,14 +12,14 @@ import (
 )
 
 // getGitCfg метод для получения конфигурации git
-func (s *Sender) getGitCfg(ctx context.Context, mr entity.MergeRequestPayload) (entity.GitlabConfig, string, bool) {
+func (gm *GitMR) getGitCfg(ctx context.Context, mr entity.MergeRequestPayload) (entity.GitlabConfig, string, error) {
 	base := normalizeInstanceURL(mr.ProjectURL)
-	gitCfg, err := s.repo.GetGitlabConfig(ctx, mr.ProjectID, base)
+	gitCfg, err := gm.repo.GetGitlabConfig(ctx, mr.ProjectID, base)
 	if err != nil {
-		s.log.Info("Не удалось получить конфигурацию к git", "project", mr.ProjectID, "base", base)
-		return entity.GitlabConfig{}, "", true
+		gm.log.Error("Не удалось получить конфигурацию к git", "project", mr.ProjectID, "base", base)
+		return entity.GitlabConfig{}, "", err
 	}
-	return gitCfg, base, false
+	return gitCfg, base, nil
 }
 
 // buildNewMRMessage собирает текст сообщения для отправки в мм при новом МР
@@ -35,7 +35,7 @@ func buildNewMRMessage(
 
 	slaLine, ttlRule := getSlaAndSizeMRLine(cfg, mrInfo)
 
-	link := fmt.Sprintf("%s/-/merge_requests/%d", mr.ProjectURL, mr.MRIID)
+	link := fmt.Sprintf("%s/-/merge_requests/%d", mr.ProjectURL, mr.MrID)
 
 	return fmt.Sprintf(
 			"**Новый МР в проекте**: %s\n**Название**: [%s](%s)\n**Автор**: @%s\n\n**Ревьюеры**: %s%s%s",

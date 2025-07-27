@@ -6,7 +6,6 @@ import (
 	_ "go.uber.org/automaxprocs/maxprocs"
 	"helper-sender-bot/internal/adapters/cacheduty"
 	"helper-sender-bot/internal/adapters/dbhesebo"
-	"helper-sender-bot/internal/adapters/gitlab"
 	"helper-sender-bot/internal/adapters/mattermost"
 	"helper-sender-bot/internal/applications/config"
 	cleanerRunner "helper-sender-bot/internal/controller/workers/duty/cleaner_old_post"
@@ -53,12 +52,6 @@ func RunWorker(cfgL *config.Logger) int {
 		return 1
 	}
 
-	cfgGitLocal, err := config.LoadGitConfig("LOCAL")
-	if err != nil {
-		appLogger.Error("Failed load LOCAL Git config", "err", err)
-		return 1
-	}
-
 	gitWorker, err := config.LoadGitWorkerCfg()
 	if err != nil {
 		appLogger.Error("Failed load LOCAL Git config", "err", err)
@@ -78,21 +71,7 @@ func RunWorker(cfgL *config.Logger) int {
 
 	// запуск worker для обработки сценариев gitlab
 	if gitWorker.StartGit {
-		gitsCfg := []gitlab.GitConfigs{
-			{
-				BaseURL: cfgGitLocal.GitURL,
-				Token:   cfgGitLocal.GitApiToken,
-			},
-			// если нужно поддержать больше инстансов gitlab
-		}
-
-		gitClient, err := gitlab.New(gitsCfg)
-		if err != nil {
-			appLogger.Error("Failed initialize gitlab client", "err", err)
-			return 1
-		}
-
-		ucGitBot := gitworker.NewSender(appLogger, mmClient, gitClient, repo)
+		ucGitBot := gitworker.NewGitWorker(appLogger, mmClient, repo)
 
 		gitPingSlaRunner.NewRepeatPush(ucGitBot).RunGoSendRepeatPush(ctx, gitWorker.Pusher)
 		dayPingerRunner.NewDayPinger(ucGitBot).RunGoSendDayPinger(ctx)
@@ -102,6 +81,7 @@ func RunWorker(cfgL *config.Logger) int {
 	if dutyWorker.StartDuty {
 		cacheDuty := cacheduty.NewCache(dutyWorker.CacheDuty, mmClient, appLogger)
 
+		// usecace (uc) для работы бота дежурств
 		ucPostInfo := updaterposts.NewUpdaterPostInfo(mmClient, repo, appLogger)
 		ucCleanOld := cleaneroldpost.NewCleanOldPost(repo, appLogger)
 		ucPusher := pusher.NewPusherDuty(repo, mmClient, appLogger, cacheDuty)

@@ -24,6 +24,7 @@ func (r *Pgx) CreatePostGitMR(ctx context.Context, p entity.PostGitMR) error {
 			"ttl_review":     p.TTLReview,
 			"reviewers":      p.Reviewers,
 			"create_at":      now,
+			"update_at":      now,
 		}).
 		ToSql()
 	if err != nil {
@@ -71,6 +72,8 @@ func (r *Pgx) GetPostGitMR(ctx context.Context, gitURL string, projectID, mrID i
 			"ttl_review",
 			"reviewers",
 			"create_at",
+			"update_at",
+			"is_draft",
 			"pushed_review",
 		).
 		From("posts_git_mr").
@@ -96,6 +99,8 @@ func (r *Pgx) GetPostGitMR(ctx context.Context, gitURL string, projectID, mrID i
 		&p.TTLReview,
 		&p.Reviewers,
 		&p.CreateAt,
+		&p.UpdateAT,
+		&p.IsDraft,
 		&p.PushedReview,
 	)
 	return p, err
@@ -117,6 +122,8 @@ func (r *Pgx) GetListPostGitMR(
 			"ttl_review",
 			"reviewers",
 			"create_at",
+			"update_at",
+			"is_draft",
 			"pushed_review",
 		).
 		From("posts_git_mr").
@@ -150,6 +157,8 @@ func (r *Pgx) GetListPostGitMR(
 			&p.TTLReview,
 			&p.Reviewers,
 			&p.CreateAt,
+			&p.UpdateAT,
+			&p.IsDraft,
 			&p.PushedReview,
 		); err != nil {
 			return nil, err
@@ -163,6 +172,25 @@ func (r *Pgx) UpdatePostGitMRPushed(ctx context.Context, gitURL string, projectI
 	sqlStr, args, err := r.sb.
 		Update("posts_git_mr").
 		Set("pushed_review", true).
+		Set("update_at", time.Now()).
+		Where(sq.Eq{
+			"git_url":        gitURL,
+			"git_project_id": projectID,
+			"git_mr_id":      mrID,
+		}).
+		ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = r.Db.Exec(ctx, sqlStr, args...)
+	return err
+}
+
+func (r *Pgx) UpdatePostGitMRIsDraft(ctx context.Context, gitURL string, projectID, mrID int, isDraft bool) error {
+	sqlStr, args, err := r.sb.
+		Update("posts_git_mr").
+		Set("is_draft", isDraft).
+		Set("update_at", time.Now()).
 		Where(sq.Eq{
 			"git_url":        gitURL,
 			"git_project_id": projectID,

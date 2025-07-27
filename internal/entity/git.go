@@ -1,47 +1,8 @@
 package entity
 
 import (
-	"github.com/google/uuid"
 	"time"
 )
-
-type Chat struct {
-	Team                  string
-	ChannelID             string
-	DutyTtlInMinute       int
-	DutyRepeatTtlInMinute int
-	EmojiStart            string
-	EmojiDone             string
-	WorkdayStart          int
-	WorkdayEnd            int
-}
-
-type Post struct {
-	ID       string `json:"id"`
-	RootId   string `json:"root_id"`
-	Message  string `json:"message"`
-	CreateAt int64  `json:"create_at"`
-	Type     string `json:"type"`
-	Metadata struct {
-		Reactions []struct {
-			EmojiName string `json:"emoji_name"`
-		} `json:"reactions"`
-	} `json:"metadata"`
-}
-
-type Team struct {
-	Name    string
-	Token   uuid.UUID
-	LeadEID string
-}
-
-type PostsInfoDuty struct {
-	ChannelID  string
-	PostID     string
-	CreateAt   time.Time
-	LastPushAt time.Time
-	InProgress bool
-}
 
 type TTLReviewItem struct {
 	SLA        int
@@ -66,7 +27,7 @@ type GitlabConfig struct {
 type MergeRequestPayload struct {
 	ProjectID      int
 	ProjectName    string
-	MRIID          int
+	MrID           int
 	MRTitle        string
 	SourceBranch   string
 	TargetBranch   string
@@ -75,11 +36,6 @@ type MergeRequestPayload struct {
 	AuthorUsername string
 	IsDraft        bool
 	MRState        string
-}
-
-type AuthMeta struct {
-	Team  string
-	Token uuid.UUID
 }
 
 type MergeRequestInfo struct {
@@ -94,8 +50,10 @@ type PostGitMR struct {
 	GitProjectID int
 	GitMRID      int
 	CreateAt     time.Time
+	UpdateAT     time.Time
 	PushedReview bool
 	PostID       string
 	TTLReview    TTLReviewItem
+	IsDraft      bool
 	Reviewers    string
 }

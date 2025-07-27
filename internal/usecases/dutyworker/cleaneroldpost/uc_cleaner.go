@@ -29,7 +29,7 @@ func (cl *Clean) CleanerOldPost(ctx context.Context, intervalCycle time.Duration
 	cutoff := time.Now().Add(-intervalCycle)
 	channels, err := cl.repo.GetListCfgDuty(ctx)
 	if err != nil {
-		cl.log.Warn("Failed to get list of duty channels", "error", err)
+		cl.log.Error("Failed to get list of duty channels", "error", err)
 		return
 	}
 

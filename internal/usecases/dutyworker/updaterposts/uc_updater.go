@@ -41,7 +41,7 @@ func (pi *PostInfo) UpdaterPosts(ctx context.Context, intervalCycle time.Duratio
 	}
 
 	for _, cfg := range channels {
-		if pi.isNotWorkingHours(cfg) {
+		if cfg.IsNotWorkingHours() {
 			return
 		}
 

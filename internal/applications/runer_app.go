@@ -18,7 +18,7 @@ import (
 	"helper-sender-bot/internal/usecases/auth"
 	"helper-sender-bot/internal/usecases/cfgduty"
 	"helper-sender-bot/internal/usecases/cfggitlab"
-	"helper-sender-bot/internal/usecases/gitworker"
+	"helper-sender-bot/internal/usecases/gitmr"
 	"helper-sender-bot/internal/usecases/team"
 	"net/http"
 	"os/signal"
@@ -62,19 +62,6 @@ func RunApp(cfgL *config.Logger) int {
 		return 1
 	}
 
-	gitsCfg := []gitlab.GitConfigs{
-		{
-			BaseURL: cfgGitLocal.GitURL,
-			Token:   cfgGitLocal.GitApiToken,
-		},
-	}
-
-	gitClient, err := gitlab.New(gitsCfg)
-	if err != nil {
-		appLogger.Error("Failed initialize gitlab client", "err", err)
-		return 1
-	}
-
 	db, err := dbhesebo.NewDB(ctx, cfgP, appLogger)
 	if err != nil {
 		appLogger.Error("Failed to initialize database", "err", err)
@@ -84,20 +71,33 @@ func RunApp(cfgL *config.Logger) int {
 	// различные репозитории
 	repo := dbhesebo.NewStorage(db)
 	mmClient := mattermost.New(cfgB.MattermostBase, cfgB.Token, appLogger)
+	gitClient, err := gitlab.New(
+		[]gitlab.GitConfigs{
+			{
+				BaseURL: cfgGitLocal.GitURL,
+				Token:   cfgGitLocal.GitApiToken,
+			},
+			// можно подключать дополнительные инстансы гитлаба
+		},
+	)
+	if err != nil {
+		appLogger.Error("Failed initialize gitlab client", "err", err)
+		return 1
+	}
 
-	// uc для api
+	// usecace (uc) для api
 	ucAuth := auth.NewAuth(ctx, repo)
 	ucChatConfigs := cfgduty.NewDutyCfgCases(ctx, repo)
 	ucTeams := team.NewTeamCases(ctx, repo)
 	ucGitConfigs := cfggitlab.NewGitCfgCases(ctx, repo)
-	ucGitBot := gitworker.NewSender(appLogger, mmClient, gitClient, repo)
+	ucGitBot := gitmr.NewGitMR(appLogger, mmClient, gitClient, repo)
 
 	echo := api.InitEcho(appLogger, cfgA.Timeout)
 
 	chatCon.NewControllerCfgDuty(ucChatConfigs, ucAuth).RegisterRoutes(echo)
 	teamCon.NewControllerTeam(ucTeams, ucAuth).RegisterRoutes(echo)
 	gitCon.NewControllerCfgGit(ucGitConfigs, ucAuth).RegisterRoutes(echo)
-	webhook.NewControllerGitlab(ctx, ucGitBot, cfgA.WebhookToken).RegisterRoutes(echo)
+	webhook.NewControllerGitlab(ctx, ucGitBot, appLogger, cfgA.WebhookToken).RegisterRoutes(echo)
 
 	go func() {
 		if err = api.Run(appLogger, echo, cfgA.Port); err != nil && !errors.Is(err, http.ErrServerClosed) {
