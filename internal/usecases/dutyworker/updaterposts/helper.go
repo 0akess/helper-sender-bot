@@ -2,19 +2,16 @@ package updaterposts
 
 import (
 	"context"
-	"fmt"
 	"helper-sender-bot/internal/entity"
 	"time"
 )
 
 // fetchAndStore выкачивает страницы API начиная с since и обрабатывает каждую
 func (pi *PostInfo) fetchAndStore(ctx context.Context, channelID string, cfg entity.Chat, since int64) {
-	const perPage = 200
-	base := fmt.Sprintf("/api/v4/channels/%s/posts", channelID)
+	const perPage int = 200
 
 	if since > 0 {
-		url := fmt.Sprintf("%s?since=%d&page=0&per_page=%d", base, since, perPage)
-		batch, err := pi.client.FetchPosts(ctx, url)
+		batch, err := pi.client.FetchPostsWithSince(ctx, channelID, int(since), perPage)
 		if err != nil {
 			pi.log.Error("fetch posts", "channel", channelID, "err", err)
 			return
@@ -33,8 +30,7 @@ func (pi *PostInfo) fetchAndStore(ctx context.Context, channelID string, cfg ent
 	}
 
 	for page := 0; ; page++ {
-		url := fmt.Sprintf("%s?page=%d&per_page=%d", base, page, perPage)
-		batch, err := pi.client.FetchPosts(ctx, url)
+		batch, err := pi.client.FetchPostsByPage(ctx, channelID, page, perPage)
 		if err != nil {
 			pi.log.Error("fetch posts", "channel", channelID, "err", err)
 			return

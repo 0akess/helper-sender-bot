@@ -8,7 +8,8 @@ import (
 )
 
 type HTTPClient interface {
-	FetchPosts(ctx context.Context, path string) ([]entity.Post, error)
+	FetchPostsByPage(ctx context.Context, channelID string, page, perPage int) ([]entity.Post, error)
+	FetchPostsWithSince(ctx context.Context, channelID string, since int, perPage int) ([]entity.Post, error)
 }
 
 type repo interface {

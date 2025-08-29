@@ -71,7 +71,7 @@ func (c *Client) ChannelHeader(ctx context.Context, id string) (string, error) {
 	return v.Header, nil
 }
 
-func (c *Client) FetchPosts(ctx context.Context, path string) ([]entity.Post, error) {
+func (c *Client) fetchPosts(ctx context.Context, path string) ([]entity.Post, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.URL+path, nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
@@ -92,6 +92,20 @@ func (c *Client) FetchPosts(ctx context.Context, path string) ([]entity.Post, er
 		out = append(out, data.Posts[id])
 	}
 	return out, nil
+}
+
+func (c *Client) FetchPostsWithSince(ctx context.Context, channelID string, since, perPage int) ([]entity.Post, error) {
+	return c.fetchPosts(
+		ctx,
+		fmt.Sprintf("/api/v4/channels/%s/posts?since=%d&page=0&per_page=%d", channelID, since, perPage),
+	)
+}
+
+func (c *Client) FetchPostsByPage(ctx context.Context, channelID string, page, perPage int) ([]entity.Post, error) {
+	return c.fetchPosts(
+		ctx,
+		fmt.Sprintf("/api/v4/channels/%s/posts?page=%d&per_page=%d", channelID, page, perPage),
+	)
 }
 
 func (c *Client) CreatePost(ctx context.Context, channelID, msg, rootID string) (string, int, error) {

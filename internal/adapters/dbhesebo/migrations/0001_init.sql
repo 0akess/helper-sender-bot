@@ -101,6 +101,39 @@ CREATE TABLE IF NOT EXISTS posts_git_mr
 CREATE INDEX IF NOT EXISTS ix_posts_git_mr_update_at ON posts_git_mr (create_at);
 CREATE INDEX IF NOT EXISTS ix_posts_git_mr_team_channel_project_id ON posts_git_mr (team_name, channel_id, git_project_id);
 
+CREATE TABLE IF NOT EXISTS config_bug
+(
+    id         INT PRIMARY KEY,
+    team_name  TEXT        NOT NULL,
+    channel_id TEXT        NOT NULL,
+    track_url  TEXT        NOT NULL,
+    track_name TEXT        NOT NULL,
+    bug_sla    JSONB       NOT NULL,
+    create_at  TIMESTAMPTZ NOT NULL,
+    update_at  TIMESTAMPTZ NOT NULL,
+
+    CONSTRAINT fk_cfg_bug
+        FOREIGN KEY (team_name)
+            REFERENCES team (team_name)
+            ON UPDATE CASCADE
+            ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS track_bug
+(
+    id         INT PRIMARY KEY,
+    cfg_bug_id INT         NOT NULL,
+    bug_sla    JSONB       NOT NULL,
+    create_at  TIMESTAMPTZ NOT NULL,
+    update_at  TIMESTAMPTZ NOT NULL,
+
+    CONSTRAINT fk_track_bug
+        FOREIGN KEY (cfg_bug_id)
+            REFERENCES config_bug (id)
+            ON UPDATE CASCADE
+            ON DELETE CASCADE
+);
+
 -- +goose Down
 drop table if exists config_gitlab;
 drop table if exists posts_duty;
